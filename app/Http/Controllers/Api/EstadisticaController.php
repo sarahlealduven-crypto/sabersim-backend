@@ -29,11 +29,7 @@ class EstadisticaController extends Controller
     #[Response(401, 'No autenticado')]
     public function index(): EstadisticaUsuarioResource
     {
-        $user = Auth::guard('sanctum')->user();
-
-        if (! $user) {
-            abort(401, 'Unauthenticated');
-        }
+        $user = Auth::user();
 
         $this->estadisticaService->actualizarEstadisticas($user);
 
@@ -55,11 +51,7 @@ class EstadisticaController extends Controller
     #[Response(404, 'Estadísticas de materia no encontradas')]
     public function show(Materia $materia): EstadisticaUsuarioResource
     {
-        $user = Auth::guard('sanctum')->user();
-
-        if (! $user) {
-            abort(401, 'Unauthenticated');
-        }
+        $user = Auth::user();
 
         $this->estadisticaService->actualizarEstadisticas($user);
 
