@@ -19,7 +19,6 @@ use Dedoc\Scramble\Attributes\PathParameter;
 use Dedoc\Scramble\Attributes\Response;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
-use Illuminate\Support\Facades\Auth;
 
 #[Group('Exámenes', weight: 1)]
 class ExamenController extends Controller
@@ -37,7 +36,7 @@ class ExamenController extends Controller
     #[Response(422, 'Validación fallida')]
     public function store(IniciarExamenRequest $request): ExamenResource
     {
-        $user = Auth::user();
+        $user = request()->user();
 
         $tipoExamen = $request->validated('tipo_examen');
 
@@ -63,7 +62,7 @@ class ExamenController extends Controller
     #[Response(200, 'Lista de exámenes del usuario')]
     public function index(): AnonymousResourceCollection
     {
-        $examenes = Auth::user()
+        $examenes = request()->user()
             ->examenes()
             ->with(['seccionesExamen.materia'])
             ->latest('fecha_inicio')
@@ -83,7 +82,7 @@ class ExamenController extends Controller
     #[Response(404, 'Examen no encontrado')]
     public function show(Examen $examen): ExamenResource
     {
-        $this->authorizeOwnership($examen);
+        $this->authorize('view', $examen);
 
         $examen->load(['seccionesExamen.materia', 'seccionesExamen.preguntas.opcionesRespuesta']);
 
@@ -102,7 +101,7 @@ class ExamenController extends Controller
     #[Response(422, 'Validación fallida')]
     public function submitRespuesta(Examen $examen, SubmitRespuestaRequest $request): JsonResponse
     {
-        $this->authorizeOwnership($examen);
+        $this->authorize('update', $examen);
 
         if ($examen->estado !== EstadoExamen::EnProgreso) {
             return response()->json([
@@ -141,7 +140,7 @@ class ExamenController extends Controller
     #[Response(404, 'Examen no encontrado')]
     public function finalizar(Examen $examen, FinalizarExamenRequest $request): JsonResponse
     {
-        $this->authorizeOwnership($examen);
+        $this->authorize('update', $examen);
 
         if ($examen->estado !== EstadoExamen::EnProgreso) {
             return response()->json([
@@ -167,19 +166,12 @@ class ExamenController extends Controller
     #[Response(404, 'Examen no encontrado')]
     public function abandonar(Examen $examen): JsonResponse
     {
-        $this->authorizeOwnership($examen);
+        $this->authorize('delete', $examen);
 
         $this->examenService->abandonarExamen($examen);
 
         return response()->json([
             'message' => 'Examen abandonado exitosamente.',
         ]);
-    }
-
-    private function authorizeOwnership(Examen $examen): void
-    {
-        if ($examen->user_id !== Auth::id()) {
-            abort(403, 'No tienes permiso para acceder a este examen.');
-        }
     }
 }
