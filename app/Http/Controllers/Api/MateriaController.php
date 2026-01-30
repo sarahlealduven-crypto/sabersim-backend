@@ -39,6 +39,10 @@ class MateriaController extends Controller
     #[Response(404, 'Materia no encontrada')]
     public function show(Materia $materia): MateriaResource
     {
+        if (! $materia->activo) {
+            abort(404, 'Materia no encontrada.');
+        }
+
         $materia->load('topicos');
 
         return new MateriaResource($materia);

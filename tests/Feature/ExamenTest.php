@@ -10,6 +10,7 @@ use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 
 use function Pest\Laravel\actingAs;
+use function Pest\Laravel\getJson;
 use function Pest\Laravel\postJson;
 
 uses(RefreshDatabase::class);
@@ -225,4 +226,112 @@ it('can show an exam', function () {
 
     $response->assertStatus(200);
     expect($response->json('data.id'))->toBe($examen->id);
+});
+
+it('can create a complete exam', function () {
+    $user = User::factory()->create();
+    Materia::factory()->count(3)->create(['activo' => true]);
+
+    $response = actingAs($user)->postJson('/api/v1/examenes', [
+        'tipo_examen' => 'completo',
+    ]);
+
+    $response->assertStatus(201);
+
+    $id = $response->json('data.id') ?? $response->json('id');
+    $examen = Examen::find($id);
+
+    expect($examen)->not->toBeNull();
+});
+
+it('requires authentication to submit answer', function () {
+    $response = postJson('/api/v1/examenes/1/respuesta', [
+        'seccion_examen_id' => 1,
+        'pregunta_id' => 1,
+        'opcion_id' => 1,
+    ]);
+
+    $response->assertStatus(401);
+});
+
+it('returns 404 for non-existent option on answer submission', function () {
+    $user = User::factory()->create();
+    $materia = Materia::factory()->create();
+    $examen = Examen::factory()->create([
+        'user_id' => $user->id,
+        'estado' => EstadoExamen::EnProgreso,
+    ]);
+
+    $seccion = SeccionExamen::create([
+        'examen_id' => $examen->id,
+        'materia_id' => $materia->id,
+        'total_preguntas' => 1,
+    ]);
+
+    $response = actingAs($user)->postJson("/api/v1/examenes/{$examen->id}/respuesta", [
+        'seccion_examen_id' => $seccion->id,
+        'pregunta_id' => 999,
+        'opcion_id' => 999,
+    ]);
+
+    $response->assertStatus(422);
+});
+
+it('cannot submit answer to non-existent exam', function () {
+    $user = User::factory()->create();
+
+    $response = actingAs($user)->postJson('/api/v1/examenes/999/respuesta', [
+        'seccion_examen_id' => 1,
+        'pregunta_id' => 1,
+        'opcion_id' => 1,
+    ]);
+
+    $response->assertStatus(404);
+});
+
+it('cannot show another users exam', function () {
+    $user = User::factory()->create();
+    $otherUser = User::factory()->create();
+    $examen = Examen::factory()->create([
+        'user_id' => $otherUser->id,
+    ]);
+
+    $response = actingAs($user)->getJson("/api/v1/examenes/{$examen->id}");
+
+    $response->assertStatus(403);
+});
+
+it('cannot show exam without authentication', function () {
+    $examen = Examen::factory()->create();
+
+    getJson("/api/v1/examenes/{$examen->id}")->assertStatus(401);
+});
+
+it('cannot list exams without authentication', function () {
+    getJson('/api/v1/examenes')->assertStatus(401);
+});
+
+it('cannot abandon exam without authentication', function () {
+    $examen = Examen::factory()->create();
+
+    postJson("/api/v1/examenes/{$examen->id}/abandonar")->assertStatus(401);
+});
+
+it('cannot finalize exam without authentication', function () {
+    $examen = Examen::factory()->create();
+
+    postJson("/api/v1/examenes/{$examen->id}/finalizar")->assertStatus(401);
+});
+
+it('cannot finalize abandoned exam', function () {
+    $user = User::factory()->create();
+    $examen = Examen::factory()->create([
+        'user_id' => $user->id,
+        'estado' => EstadoExamen::Abandonado,
+    ]);
+
+    $response = actingAs($user)->postJson("/api/v1/examenes/{$examen->id}/finalizar");
+
+    $response->assertStatus(400);
+    expect($response->json('message'))->toBe('El examen ya ha sido completado o abandonado.');
 });

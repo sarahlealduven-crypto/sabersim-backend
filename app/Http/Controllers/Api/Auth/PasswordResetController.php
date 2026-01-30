@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Api\Auth;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\ForgotPasswordRequest;
 use App\Http\Requests\ResetPasswordRequest;
 use Dedoc\Scramble\Attributes\Endpoint;
 use Dedoc\Scramble\Attributes\Group;
@@ -20,9 +21,9 @@ class PasswordResetController extends Controller
         description: 'Envía un enlace de restablecimiento de contraseña al correo del usuario.'
     )]
     #[Response(200, 'Enlace de restablecimiento enviado (o correo no encontrado)')]
-    public function forgotPassword(ResetPasswordRequest $request): JsonResponse
+    public function forgotPassword(ForgotPasswordRequest $request): JsonResponse
     {
-        $status = Password::sendResetLink($request->validated('email'));
+        $status = Password::sendResetLink(['email' => $request->validated('email')]);
 
         return response()->json([
             'message' => $status === Password::RESET_LINK_SENT
@@ -40,7 +41,9 @@ class PasswordResetController extends Controller
     #[Response(400, 'Token inválido o expirado')]
     public function reset(ResetPasswordRequest $request): JsonResponse
     {
-        $status = Password::reset($request->validated('token'), function ($user, $password) {
+        $credentials = $request->validated();
+
+        $status = Password::reset($credentials, function ($user, $password) {
             $user->forceFill([
                 'password' => Hash::make($password),
             ])->save();
@@ -49,7 +52,7 @@ class PasswordResetController extends Controller
         return response()->json([
             'message' => $status === Password::PASSWORD_RESET
                 ? 'Contraseña restablecida exitosamente.'
-                : 'El token de restablecimiento es invado o ha expirado.',
+                : 'El token de restablecimiento es inválido o ha expirado.',
         ]);
     }
 }

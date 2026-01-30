@@ -39,6 +39,15 @@ it('returns only active subjects ordered by display order', function () {
     expect($data[0]['nombre'])->toBe('First Subject');
 });
 
+it('returns empty list when no active subjects', function () {
+    Materia::factory()->count(3)->create(['activo' => false]);
+
+    $response = getJson('/api/v1/materias');
+
+    $response->assertStatus(200);
+    expect($response->json('data'))->toHaveCount(0);
+});
+
 it('returns a subject with its topics', function () {
     $materia = Materia::factory()->create();
     for ($i = 0; $i < 3; $i++) {
@@ -55,4 +64,18 @@ it('returns a subject with its topics', function () {
     $id = $response->json('data.id') ?? $response->json('id');
     expect($id)->toBe($materia->id);
     expect($response->json('data.topicos'))->toHaveCount(3);
+});
+
+it('returns 404 for non-existing subject', function () {
+    $response = getJson('/api/v1/materias/non-existent-slug');
+
+    $response->assertStatus(404);
+});
+
+it('returns 404 for inactive subject', function () {
+    $materia = Materia::factory()->create(['activo' => false]);
+
+    $response = getJson("/api/v1/materias/{$materia->slug}");
+
+    $response->assertStatus(404);
 });

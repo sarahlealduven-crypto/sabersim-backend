@@ -51,3 +51,39 @@ it('requires authentication to view statistics', function () {
     getJson('/api/v1/estadisticas')
         ->assertStatus(401);
 });
+
+it('returns 404 for non-existent subject statistics', function () {
+    $user = User::factory()->create();
+
+    $response = actingAs($user)->getJson('/api/v1/estadisticas/non-existent-slug');
+
+    $response->assertStatus(404);
+});
+
+it('returns statistics when no previous data exists', function () {
+    $user = User::factory()->create();
+    Materia::factory()->create(['activo' => true]);
+
+    $response = actingAs($user)->getJson('/api/v1/estadisticas');
+
+    $response->assertStatus(200);
+    // El servicio debería crear estadísticas por defecto si no existen
+    expect($response->json('data.user_id'))->toBe($user->id);
+});
+
+it('returns zero statistics for user with no exams', function () {
+    $user = User::factory()->create();
+    $materia = Materia::factory()->create();
+
+    EstadisticaUsuario::factory()->create([
+        'user_id' => $user->id,
+        'materia_id' => $materia->id,
+        'total_examenes' => 0,
+        'puntaje_promedio' => 0.0,
+    ]);
+
+    $response = actingAs($user)->getJson("/api/v1/estadisticas/{$materia->slug}");
+
+    $response->assertStatus(200);
+    expect($response->json('data.total_examenes'))->toBe(0);
+});

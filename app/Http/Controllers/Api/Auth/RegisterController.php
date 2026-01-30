@@ -23,11 +23,13 @@ class RegisterController extends Controller
     #[Response(422, 'Validación fallida')]
     public function store(RegisterRequest $request): JsonResponse
     {
+        $validated = $request->validated();
+
         $user = User::create([
-            'name' => $request->validated('name'),
-            'email' => $request->validated('email'),
-            'password' => Hash::make($request->validated('password')),
-            'grade_level' => $request->validated('grade_level') ?? 11,
+            'name' => $validated['name'],
+            'email' => $validated['email'],
+            'password' => Hash::make($validated['password']),
+            'grade_level' => $validated['grade_level'] ?? 11,
             'current_level' => 1,
             'total_xp' => 0,
         ]);
