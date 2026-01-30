@@ -153,7 +153,7 @@ class PreguntaFactory extends Factory
      */
     public function lecturaCritica(): static
     {
-        return $this->state(fn (array $attributes): array => [
+        return $this->state(fn(array $attributes): array => [
             'texto_pregunta' => fake()->randomElement([
                 'De acuerdo con el texto anterior, ¿cuál es la idea principal que el autor expone?',
                 '¿Qué función cumple la expresión subrayada en el contexto del texto?',
@@ -168,7 +168,7 @@ class PreguntaFactory extends Factory
      */
     public function matematicas(): static
     {
-        return $this->state(fn (array $attributes): array => [
+        return $this->state(fn(array $attributes): array => [
             'texto_pregunta' => fake()->randomElement([
                 'Si f(x) = 2x² - 3x + 5, ¿cuál es el valor de f(4)?',
                 '¿Cuál es la solución de la ecuación 3x + 7 = 22?',
@@ -183,7 +183,7 @@ class PreguntaFactory extends Factory
      */
     public function sociales(): static
     {
-        return $this->state(fn (array $attributes): array => [
+        return $this->state(fn(array $attributes): array => [
             'texto_pregunta' => fake()->randomElement([
                 '¿Cuál fue el principal objetivo de la independencia de Colombia?',
                 '¿Qué departamento colombiano se encuentra en la región Caribe?',
@@ -198,7 +198,7 @@ class PreguntaFactory extends Factory
      */
     public function cienciasNaturales(): static
     {
-        return $this->state(fn (array $attributes): array => [
+        return $this->state(fn(array $attributes): array => [
             'texto_pregunta' => fake()->randomElement([
                 '¿Qué orgánulo celular es responsable de la producción de energía?',
                 '¿Cuál es la fórmula química del agua?',
@@ -213,7 +213,7 @@ class PreguntaFactory extends Factory
      */
     public function ingles(): static
     {
-        return $this->state(fn (array $attributes): array => [
+        return $this->state(fn(array $attributes): array => [
             'texto_pregunta' => fake()->randomElement([
                 'Read following text and answer: What is main purpose of the text?',
                 'Choose correct verb form: She _____ to the concert last night.',
@@ -228,7 +228,7 @@ class PreguntaFactory extends Factory
      */
     public function facil(): static
     {
-        return $this->state(fn (array $attributes): array => [
+        return $this->state(fn(array $attributes): array => [
             'nivel_dificultad' => NivelDificultad::Facil,
         ]);
     }
@@ -238,7 +238,7 @@ class PreguntaFactory extends Factory
      */
     public function medio(): static
     {
-        return $this->state(fn (array $attributes): array => [
+        return $this->state(fn(array $attributes): array => [
             'nivel_dificultad' => NivelDificultad::Medio,
         ]);
     }
@@ -248,7 +248,7 @@ class PreguntaFactory extends Factory
      */
     public function dificil(): static
     {
-        return $this->state(fn (array $attributes): array => [
+        return $this->state(fn(array $attributes): array => [
             'nivel_dificultad' => NivelDificultad::Dificil,
         ]);
     }
@@ -258,7 +258,7 @@ class PreguntaFactory extends Factory
      */
     public function inactiva(): static
     {
-        return $this->state(fn (array $attributes): array => [
+        return $this->state(fn(array $attributes): array => [
             'activo' => false,
         ]);
     }
