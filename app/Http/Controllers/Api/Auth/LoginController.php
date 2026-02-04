@@ -22,6 +22,9 @@ class LoginController extends Controller
     )]
     #[Response(200, 'Usuario autenticado exitosamente')]
     #[Response(422, 'Credenciales inválidas')]
+    /**
+     * @unauthenticated
+     */
     public function store(LoginRequest $request): JsonResponse
     {
         $user = User::where('email', $request->validated('email'))->first();

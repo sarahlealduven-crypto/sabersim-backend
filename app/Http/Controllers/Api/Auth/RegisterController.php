@@ -21,6 +21,9 @@ class RegisterController extends Controller
     )]
     #[Response(201, 'Usuario registrado exitosamente')]
     #[Response(422, 'Validación fallida')]
+    /**
+     * @unauthenticated
+     */
     public function store(RegisterRequest $request): JsonResponse
     {
         $validated = $request->validated();
