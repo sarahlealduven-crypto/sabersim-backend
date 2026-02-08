@@ -60,4 +60,9 @@ class User extends Authenticatable
     {
         return $this->hasMany(EstadisticaUsuario::class);
     }
+
+    public function agentConversations(): HasMany
+    {
+        return $this->hasMany(AgentConversation::class);
+    }
 }

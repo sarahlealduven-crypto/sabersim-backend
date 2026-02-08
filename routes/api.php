@@ -7,6 +7,7 @@ use App\Http\Controllers\Api\Auth\RegisterController;
 use App\Http\Controllers\Api\EstadisticaController;
 use App\Http\Controllers\Api\ExamenController;
 use App\Http\Controllers\Api\MateriaController;
+use App\Http\Controllers\Api\TutorController;
 use Illuminate\Support\Facades\Route;
 
 Route::prefix('auth')->group(function () {
@@ -34,4 +35,10 @@ Route::middleware('auth:sanctum')->prefix('v1')->group(function () {
 
     Route::get('/estadisticas', [EstadisticaController::class, 'index']);
     Route::get('/estadisticas/{materia}', [EstadisticaController::class, 'show']);
+
+    Route::middleware('no_active_exam')->prefix('tutor')->group(function () {
+        Route::post('/ask', [TutorController::class, 'ask']);
+        Route::post('/continue/{conversationId}', [TutorController::class, 'continue']);
+        Route::get('/conversations', [TutorController::class, 'conversations']);
+    });
 });
