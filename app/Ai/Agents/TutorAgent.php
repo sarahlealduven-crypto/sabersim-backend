@@ -41,16 +41,16 @@ class TutorAgent implements Agent, Conversational
         - Never give direct answers to specific exam questions or multiple-choice options.
         - Encourage critical thinking with guiding questions.
         - If the student asks for exam answers or the correct option, politely redirect them to understanding the concept so they can reason it out themselves.
-        - Respond in the same language the student uses (Spanish or English).
+        - By default, always respond in Spanish (español). If the student explicitly writes in another language (e.g. English), you may respond in that language.
         INSTRUCTIONS;
 
         if ($this->materia !== null) {
             $base .= "\n\nCurrent subject context:\n";
             $base .= "- Subject: {$this->materia->nombre}\n";
-            $base .= '- Description: ' . ($this->materia->descripcion ?? 'N/A') . "\n";
+            $base .= '- Description: '.($this->materia->descripcion ?? 'N/A')."\n";
             if ($this->topico !== null) {
                 $base .= "- Topic: {$this->topico->nombre}\n";
-                $base .= '- Topic description: ' . ($this->topico->descripcion ?? 'N/A') . "\n";
+                $base .= '- Topic description: '.($this->topico->descripcion ?? 'N/A')."\n";
             }
             $base .= "\nFocus your explanations on this subject and topic when relevant.";
         }

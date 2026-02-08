@@ -18,6 +18,7 @@ use Dedoc\Scramble\Attributes\Group;
 use Dedoc\Scramble\Attributes\PathParameter;
 use Dedoc\Scramble\Attributes\Response;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
 
 #[Group('Exámenes', weight: 1)]
@@ -57,16 +58,19 @@ class ExamenController extends Controller
     #[Endpoint(
         operationId: 'listExams',
         title: 'Listar exámenes del usuario',
-        description: 'Devuelve una lista de todos los exámenes realizados por el usuario autenticado, ordenados por fecha de inicio.'
+        description: 'Devuelve una lista paginada de exámenes del usuario autenticado, ordenados por fecha de inicio (más recientes primero). Acepta query: page, per_page.'
     )]
-    #[Response(200, 'Lista de exámenes del usuario')]
-    public function index(): AnonymousResourceCollection
+    #[Response(200, 'Lista paginada de exámenes del usuario')]
+    public function index(Request $request): AnonymousResourceCollection
     {
-        $examenes = request()->user()
+        $perPage = min((int) $request->input('per_page', 15), 50);
+        $perPage = $perPage > 0 ? $perPage : 15;
+
+        $examenes = $request->user()
             ->examenes()
             ->with(['seccionesExamen.materia'])
             ->latest('fecha_inicio')
-            ->get();
+            ->paginate($perPage);
 
         return ExamenResource::collection($examenes);
     }
