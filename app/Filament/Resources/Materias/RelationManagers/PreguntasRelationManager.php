@@ -22,10 +22,28 @@ class PreguntasRelationManager extends RelationManager
 
     protected static ?string $title = 'Questions';
 
+    protected function getFormActions(): array
+    {
+        return array_map(
+            fn ($action) => $action instanceof CreateAction
+                ? $action->mutateFormDataBeforeCreate(function (array $data): array {
+                    // Establecer materia_id desde la materia padre
+                    $data['materia_id'] = $this->getOwnerRecord()->id;
+
+                    return $data;
+                })
+                : $action,
+            parent::getFormActions(),
+        );
+    }
+
     public function form(Schema $schema): Schema
     {
         return $schema
             ->components([
+                Forms\Components\Hidden::make('materia_id')
+                    ->default(fn () => $this->getOwnerRecord()->id),
+
                 Section::make('Question Content')
                     ->schema([
                         Forms\Components\Textarea::make('texto_pregunta')
@@ -88,7 +106,7 @@ class PreguntasRelationManager extends RelationManager
                 Tables\Columns\TextColumn::make('nivel_dificultad')
                     ->label('Dificultad')
                     ->badge()
-                    ->color(fn(NivelDificultad $state): string => match ($state) {
+                    ->color(fn (NivelDificultad $state): string => match ($state) {
                         NivelDificultad::Facil => 'success',
                         NivelDificultad::Medio => 'warning',
                         NivelDificultad::Dificil => 'danger',

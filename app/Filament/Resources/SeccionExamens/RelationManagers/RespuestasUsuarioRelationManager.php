@@ -12,7 +12,7 @@ use Filament\Tables\Table;
 
 class RespuestasUsuarioRelationManager extends RelationManager
 {
-    protected static string $relationship = 'respuestas_usuario';
+    protected static string $relationship = 'respuestasUsuario';
 
     protected static ?string $title = 'Respuestas del usuario';
 
@@ -68,7 +68,7 @@ class RespuestasUsuarioRelationManager extends RelationManager
                     ->label('Selected')
                     ->badge()
                     ->color('info')
-                    ->description(fn($record): ?string => $record->opcionSeleccionada->texto_opcion ?? ''),
+                    ->description(fn ($record): ?string => $record->opcionSeleccionada->texto_opcion ?? ''),
 
                 Tables\Columns\IconColumn::make('es_correcta')
                     ->label('Correct')
@@ -81,7 +81,7 @@ class RespuestasUsuarioRelationManager extends RelationManager
                 Tables\Columns\TextColumn::make('tiempo_gastado')
                     ->label('Tiempo empleado')
                     ->numeric()
-                    ->formatStateUsing(fn($state): string => $state ? self::formatTime($state) : '00:00')
+                    ->formatStateUsing(fn ($state): string => $state ? self::formatTime($state) : '00:00')
                     ->toggleable(isToggledHiddenByDefault: true),
 
                 Tables\Columns\TextColumn::make('created_at')

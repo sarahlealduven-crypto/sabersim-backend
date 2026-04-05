@@ -45,7 +45,7 @@ class SeccionExamenResource extends Resource
     {
         return [
             'preguntas' => PreguntasRelationManager::class,
-            'respuestas_usuario' => RespuestasUsuarioRelationManager::class,
+            'respuestasUsuario' => RespuestasUsuarioRelationManager::class,
         ];
     }
 
