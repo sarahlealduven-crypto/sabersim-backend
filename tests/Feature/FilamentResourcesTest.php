@@ -131,6 +131,11 @@ it('loads every Filament resource list page with records', function (string $pag
     'usuarios' => [ListUsers::class, 'Admin Student'],
 ]);
 
+it('has the subject placeholder image used by the Filament table', function (): void {
+    expect(public_path('images/placeholder-subject.svg'))
+        ->toBeFile();
+});
+
 it('loads every Filament resource create page', function (string $pageClass): void {
     $records = filamentResourceGraph();
     actingAs($records['user']);
