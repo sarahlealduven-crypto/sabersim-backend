@@ -56,7 +56,7 @@ class OpcionRespuesta extends Model
             }
         }
 
-        return end($letrasDisponibles);
+        return chr(ord((string) end($letrasDisponibles)) + 1);
     }
 
     public function pregunta(): BelongsTo

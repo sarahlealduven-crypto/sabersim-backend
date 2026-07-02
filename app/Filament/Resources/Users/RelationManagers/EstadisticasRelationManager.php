@@ -37,25 +37,16 @@ class EstadisticasRelationManager extends RelationManager
                             ->minValue(0)
                             ->disabled(),
 
-                        Forms\Components\TextInput::make('total_preguntas')
+                        Forms\Components\TextInput::make('total_preguntas_respondidas')
                             ->label('Total de preguntas')
                             ->numeric()
                             ->minValue(0)
                             ->disabled(),
 
-                        Forms\Components\TextInput::make('total_correctas')
+                        Forms\Components\TextInput::make('respuestas_correctas')
                             ->label('Total correctas')
                             ->numeric()
                             ->minValue(0)
-                            ->disabled(),
-
-                        Forms\Components\TextInput::make('porcentaje')
-                            ->label('Puntaje global (%)')
-                            ->numeric()
-                            ->minValue(0)
-                            ->maxValue(100)
-                            ->step(0.01)
-                            ->suffix('%')
                             ->disabled(),
                     ])
                     ->columns(2),
@@ -81,12 +72,12 @@ class EstadisticasRelationManager extends RelationManager
                             ->suffix('%')
                             ->disabled(),
 
-                        Forms\Components\TextInput::make('tiempo_total')
+                        Forms\Components\TextInput::make('tiempo_total_gastado')
                             ->label('Tiempo total empleado (segundos)')
                             ->numeric()
                             ->minValue(0)
                             ->disabled()
-                            ->formatStateUsing(fn($state): string => $state ? self::formatTime($state) : '00:00'),
+                            ->formatStateUsing(fn ($state): string => $state ? self::formatTime($state) : '00:00'),
                     ])
                     ->columns(2),
             ])
@@ -112,51 +103,43 @@ class EstadisticasRelationManager extends RelationManager
                     ->badge()
                     ->color('primary'),
 
-                Tables\Columns\TextColumn::make('total_preguntas')
+                Tables\Columns\TextColumn::make('total_preguntas_respondidas')
                     ->label('Questions')
                     ->numeric()
                     ->sortable(),
 
-                Tables\Columns\TextColumn::make('total_correctas')
+                Tables\Columns\TextColumn::make('respuestas_correctas')
                     ->label('Correctas')
                     ->numeric()
                     ->sortable(),
-
-                Tables\Columns\TextColumn::make('porcentaje')
-                    ->label('Overall Score')
-                    ->numeric()
-                    ->sortable()
-                    ->formatStateUsing(fn($state): string => number_format($state, 2) . '%')
-                    ->badge()
-                    ->color(fn($state): string => ($state >= 70) ? 'success' : (($state >= 50) ? 'warning' : 'danger')),
 
                 Tables\Columns\TextColumn::make('puntaje_promedio')
                     ->label('Promedio')
                     ->numeric()
                     ->sortable()
-                    ->formatStateUsing(fn($state): string => number_format($state, 2) . '%')
+                    ->formatStateUsing(fn ($state): string => number_format($state, 2).'%')
                     ->badge()
-                    ->color(fn($state): string => ($state >= 70) ? 'success' : (($state >= 50) ? 'warning' : 'danger')),
+                    ->color(fn ($state): string => ($state >= 70) ? 'success' : (($state >= 50) ? 'warning' : 'danger')),
 
                 Tables\Columns\TextColumn::make('mejor_puntaje')
                     ->label('Best Score')
                     ->numeric()
                     ->sortable()
-                    ->formatStateUsing(fn($state): string => number_format($state, 2) . '%')
+                    ->formatStateUsing(fn ($state): string => number_format($state, 2).'%')
                     ->badge()
                     ->color('success'),
 
-                Tables\Columns\TextColumn::make('tiempo_total')
+                Tables\Columns\TextColumn::make('tiempo_total_gastado')
                     ->label('Tiempo total')
                     ->numeric()
                     ->sortable()
-                    ->formatStateUsing(fn($state): string => $state ? self::formatTime($state) : '00:00'),
+                    ->formatStateUsing(fn ($state): string => $state ? self::formatTime($state) : '00:00'),
 
-                Tables\Columns\TextColumn::make('ultimo_examen')
+                Tables\Columns\TextColumn::make('fecha_ultimo_examen')
                     ->label('Last Exam')
                     ->dateTime()
                     ->sortable()
-                    ->formatStateUsing(fn($state): ?string => $state ? $state->format('d/m/Y H:i') : '-'),
+                    ->formatStateUsing(fn ($state): ?string => $state ? $state->format('d/m/Y H:i') : '-'),
 
                 Tables\Columns\TextColumn::make('created_at')
                     ->label('Creado')
@@ -206,6 +189,7 @@ class EstadisticasRelationManager extends RelationManager
         if ($hours > 0) {
             return sprintf('%02d:%02d:%02d', $hours, $minutes, $secs);
         }
+
         return sprintf('%02d:%02d', $minutes, $secs);
     }
 }

@@ -40,26 +40,19 @@ class EstadisticaUsuarioInfolist
                                     ->color('primary')
                                     ->icon('heroicon-o-document-text'),
 
-                                TextEntry::make('total_preguntas')
+                                TextEntry::make('total_preguntas_respondidas')
                                     ->label('Total de preguntas')
                                     ->numeric()
                                     ->badge()
                                     ->color('info')
                                     ->icon('heroicon-o-question-mark-circle'),
 
-                                TextEntry::make('total_correctas')
+                                TextEntry::make('respuestas_correctas')
                                     ->label('Total correctas')
                                     ->numeric()
                                     ->badge()
                                     ->color('success')
                                     ->icon('heroicon-o-check-circle'),
-
-                                TextEntry::make('porcentaje')
-                                    ->label('Puntaje global')
-                                    ->formatStateUsing(fn($state): string => number_format($state, 2) . '%')
-                                    ->badge()
-                                    ->color(fn($state): string => $state >= 70 ? 'success' : ($state >= 50 ? 'warning' : 'danger'))
-                                    ->icon('heroicon-o-chart-bar'),
                             ]),
                     ]),
 
@@ -69,24 +62,24 @@ class EstadisticaUsuarioInfolist
                             ->schema([
                                 TextEntry::make('puntaje_promedio')
                                     ->label('Puntaje promedio')
-                                    ->formatStateUsing(fn($state): string => number_format($state, 2) . '%')
+                                    ->formatStateUsing(fn ($state): string => number_format($state, 2).'%')
                                     ->badge()
-                                    ->color(fn($state): string => $state >= 70 ? 'success' : ($state >= 50 ? 'warning' : 'danger'))
+                                    ->color(fn ($state): string => $state >= 70 ? 'success' : ($state >= 50 ? 'warning' : 'danger'))
                                     ->icon('heroicon-o-chart-bar'),
 
                                 TextEntry::make('mejor_puntaje')
                                     ->label('Mejor puntaje')
-                                    ->formatStateUsing(fn($state): string => number_format($state, 2) . '%')
+                                    ->formatStateUsing(fn ($state): string => number_format($state, 2).'%')
                                     ->badge()
                                     ->color('success')
                                     ->icon('heroicon-o-star'),
 
-                                TextEntry::make('tiempo_total')
+                                TextEntry::make('tiempo_total_gastado')
                                     ->label('Tiempo total empleado')
-                                    ->formatStateUsing(fn($state): string => $state ? self::formatTime($state) : '00:00')
+                                    ->formatStateUsing(fn ($state): string => $state ? self::formatTime($state) : '00:00')
                                     ->icon('heroicon-o-clock'),
 
-                                TextEntry::make('ultimo_examen')
+                                TextEntry::make('fecha_ultimo_examen')
                                     ->label('Último examen')
                                     ->dateTime()
                                     ->icon('heroicon-o-calendar'),
@@ -108,6 +101,7 @@ class EstadisticaUsuarioInfolist
         if ($hours > 0) {
             return sprintf('%02d:%02d:%02d', $hours, $minutes, $secs);
         }
+
         return sprintf('%02d:%02d', $minutes, $secs);
     }
 }

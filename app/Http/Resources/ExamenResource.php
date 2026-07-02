@@ -75,7 +75,7 @@ class ExamenResource extends JsonResource
             /**
              * Lista de secciones del examen por materia.
              */
-            'secciones' => SeccionExamenResource::collection($this->whenLoaded('seccionesExamen') ? $this->seccionesExamen : []),
+            'secciones' => SeccionExamenResource::collection($this->whenLoaded('seccionesExamen')),
         ];
     }
 }

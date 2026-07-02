@@ -22,21 +22,6 @@ class PreguntasRelationManager extends RelationManager
 
     protected static ?string $title = 'Questions';
 
-    protected function getFormActions(): array
-    {
-        return array_map(
-            fn ($action) => $action instanceof CreateAction
-                ? $action->mutateFormDataBeforeCreate(function (array $data): array {
-                    // Establecer materia_id desde la materia padre
-                    $data['materia_id'] = $this->getOwnerRecord()->id;
-
-                    return $data;
-                })
-                : $action,
-            parent::getFormActions(),
-        );
-    }
-
     public function form(Schema $schema): Schema
     {
         return $schema

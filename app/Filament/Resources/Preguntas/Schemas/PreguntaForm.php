@@ -5,11 +5,11 @@ namespace App\Filament\Resources\Preguntas\Schemas;
 use App\Enums\NivelDificultad;
 use Filament\Forms;
 use Filament\Forms\Components\Repeater;
-use Filament\Forms\Components\Select;
-use Filament\Schemas\Components\Section;
-use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\RichEditor;
+use Filament\Forms\Components\Select;
+use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\Toggle;
+use Filament\Schemas\Components\Section;
 use Filament\Schemas\Schema;
 
 class PreguntaForm
@@ -62,7 +62,7 @@ class PreguntaForm
                             ->preload()
                             ->reactive()
                             ->afterStateUpdated(function ($state, callable $get) {
-                                if ($get('topico_id') && !$get('texto_pregunta')) {
+                                if ($get('topico_id') && ! $get('texto_pregunta')) {
                                     // Auto-populate question if needed
                                 }
                             })
@@ -104,16 +104,10 @@ class PreguntaForm
                                     ->label('Respuesta correcta')
                                     ->inline(false)
                                     ->reactive()
-                                    ->afterStateUpdated(function ($state, callable $get, callable $set) {
-                                        // Ensure only one option is marked as correct
-                                        if ($state) {
-                                            // Logic will be handled by observer
-                                        }
-                                    })
                                     ->live(),
                             ])
                             ->columns(2)
-                            ->itemLabel(fn(array $state): ?string => trim(($state['letra_opcion'] ?? '') . '. ' . ($state['texto_opcion'] ?? '')) ?: null)
+                            ->itemLabel(fn (array $state): ?string => trim(($state['letra_opcion'] ?? '').'. '.($state['texto_opcion'] ?? '')) ?: null)
                             ->minItems(2)
                             ->maxItems(6)
                             ->defaultItems(4)

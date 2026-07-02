@@ -99,6 +99,56 @@ it('can submit an answer to an exam', function () {
     expect($response->json('es_correcta'))->toBe($opcion->es_correcta);
 });
 
+it('rejects an answer when the question is not attached to the exam section', function () {
+    $user = User::factory()->create();
+    $materia = Materia::factory()->create();
+    $examen = Examen::factory()->create([
+        'user_id' => $user->id,
+        'estado' => EstadoExamen::EnProgreso,
+    ]);
+    $seccion = SeccionExamen::create([
+        'examen_id' => $examen->id,
+        'materia_id' => $materia->id,
+        'total_preguntas' => 1,
+    ]);
+    $pregunta = Pregunta::factory()->create(['materia_id' => $materia->id]);
+    $opcion = OpcionRespuesta::factory()->create(['pregunta_id' => $pregunta->id]);
+
+    $response = actingAs($user)->postJson("/api/v1/examenes/{$examen->id}/respuesta", [
+        'seccion_examen_id' => $seccion->id,
+        'pregunta_id' => $pregunta->id,
+        'opcion_id' => $opcion->id,
+    ]);
+
+    $response->assertNotFound();
+});
+
+it('rejects an answer when the option does not belong to the submitted question', function () {
+    $user = User::factory()->create();
+    $materia = Materia::factory()->create();
+    $examen = Examen::factory()->create([
+        'user_id' => $user->id,
+        'estado' => EstadoExamen::EnProgreso,
+    ]);
+    $seccion = SeccionExamen::create([
+        'examen_id' => $examen->id,
+        'materia_id' => $materia->id,
+        'total_preguntas' => 1,
+    ]);
+    $pregunta = Pregunta::factory()->create(['materia_id' => $materia->id]);
+    $otherQuestion = Pregunta::factory()->create(['materia_id' => $materia->id]);
+    $optionFromOtherQuestion = OpcionRespuesta::factory()->create(['pregunta_id' => $otherQuestion->id]);
+    $pregunta->seccionesExamen()->attach($seccion->id);
+
+    $response = actingAs($user)->postJson("/api/v1/examenes/{$examen->id}/respuesta", [
+        'seccion_examen_id' => $seccion->id,
+        'pregunta_id' => $pregunta->id,
+        'opcion_id' => $optionFromOtherQuestion->id,
+    ]);
+
+    $response->assertNotFound();
+});
+
 it('prevents submitting to completed exam', function () {
     $user = User::factory()->create();
     $materia = Materia::factory()->create();
@@ -165,6 +215,27 @@ it('can finalize an exam', function () {
     $response->assertStatus(200);
     expect($examen->fresh()->estado)->toBe(EstadoExamen::Completado);
     expect($examen->fresh()->puntaje_total)->not->toBeNull();
+});
+
+it('can finalize an exam section that has no questions without dividing by zero', function () {
+    $user = User::factory()->create();
+    $materia = Materia::factory()->create();
+    $examen = Examen::factory()->create([
+        'user_id' => $user->id,
+        'estado' => EstadoExamen::EnProgreso,
+    ]);
+    SeccionExamen::create([
+        'examen_id' => $examen->id,
+        'materia_id' => $materia->id,
+        'total_preguntas' => 0,
+    ]);
+
+    $response = actingAs($user)->postJson("/api/v1/examenes/{$examen->id}/finalizar");
+
+    $response->assertOk();
+    expect($examen->fresh())
+        ->estado->toBe(EstadoExamen::Completado)
+        ->puntaje_total->toBe('0.00');
 });
 
 it('cannot finalize already completed exam', function () {

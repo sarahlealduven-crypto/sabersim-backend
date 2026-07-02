@@ -24,7 +24,7 @@ class RespuestaUsuarioResource extends JsonResource
              *
              * @example 1
              */
-            'user_id' => $this->user_id,
+            'user_id' => $this->seccionExamen?->examen?->user_id,
 
             /**
              * ID de la sección del examen.

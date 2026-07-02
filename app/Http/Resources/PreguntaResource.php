@@ -71,7 +71,7 @@ class PreguntaResource extends JsonResource
             /**
              * Lista de opciones de respuesta.
              */
-            'opciones' => OpcionRespuestaResource::collection($this->whenLoaded('opcionesRespuesta') ? $this->opcionesRespuesta : []),
+            'opciones' => OpcionRespuestaResource::collection($this->whenLoaded('opcionesRespuesta')),
         ];
     }
 }

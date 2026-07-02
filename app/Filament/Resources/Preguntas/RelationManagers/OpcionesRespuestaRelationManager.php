@@ -50,12 +50,6 @@ class OpcionesRespuestaRelationManager extends RelationManager
                             ->label('Correct Answer')
                             ->inline(false)
                             ->reactive()
-                            ->afterStateUpdated(function ($state, callable $get, callable $set) {
-                                // Ensure only one option is marked as correct
-                                if ($state) {
-                                    // Logic will be handled by observer
-                                }
-                            })
                             ->live(),
                     ])
                     ->columns(2),

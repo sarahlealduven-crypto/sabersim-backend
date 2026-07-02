@@ -5,6 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class SeccionExamen extends Model
@@ -47,7 +48,7 @@ class SeccionExamen extends Model
         return $this->hasMany(RespuestaUsuario::class);
     }
 
-    public function preguntas()
+    public function preguntas(): BelongsToMany
     {
         return $this->belongsToMany(Pregunta::class, 'pregunta_seccion_examen', 'seccion_examen_id', 'pregunta_id');
     }
