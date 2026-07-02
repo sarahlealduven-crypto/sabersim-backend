@@ -78,7 +78,7 @@ class MateriaResource extends JsonResource
             /**
              * Temas asociados con esta materia.
              */
-            'topicos' => TopicoResource::collection($this->whenLoaded('topicos') ? $this->topicos : []),
+            'topicos' => TopicoResource::collection($this->whenLoaded('topicos')),
         ];
     }
 }

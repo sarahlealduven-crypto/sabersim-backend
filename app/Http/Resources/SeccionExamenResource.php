@@ -29,7 +29,7 @@ class SeccionExamenResource extends JsonResource
             /**
              * Información de la materia para esta sección.
              */
-            'materia' => MateriaResource::make($this->whenLoaded('materia') ? $this->materia : null),
+            'materia' => MateriaResource::make($this->whenLoaded('materia')),
 
             /**
              * Puntaje obtenido en esta sección.
@@ -62,7 +62,7 @@ class SeccionExamenResource extends JsonResource
             /**
              * Lista de preguntas en esta sección.
              */
-            'preguntas' => PreguntaResource::collection($this->whenLoaded('preguntas') ? $this->preguntas : []),
+            'preguntas' => PreguntaResource::collection($this->whenLoaded('preguntas')),
         ];
     }
 }
