@@ -22,6 +22,7 @@ beforeEach(function () {
 });
 
 it('can ask tutor and get response', function () {
+    config(['ai.providers.openrouter.key' => 'testing-key']);
     TutorAgent::fake(['This is the tutor response.']);
 
     $response = actingAs($this->user)->postJson('/api/v1/tutor/ask', [
@@ -44,7 +45,31 @@ it('can ask tutor and get response', function () {
     expect($conversationId)->not->toBeEmpty();
 });
 
+it('uses a local tutor fallback when OpenRouter key is missing', function () {
+    config(['ai.providers.openrouter.key' => null]);
+
+    $response = actingAs($this->user)->postJson('/api/v1/tutor/ask', [
+        'question' => 'Dame una estrategia para lectura crítica',
+    ]);
+
+    $response->assertSuccessful()
+        ->assertJsonStructure([
+            'data' => [
+                'conversation_id',
+                'response',
+                'materia',
+                'topico',
+                'created_at',
+            ],
+        ]);
+
+    expect($response->json('data.response'))->toContain('modo tutor local')
+        ->and(AgentConversationMessage::where('user_id', $this->user->id)->count())->toBe(2);
+});
+
 it('can continue conversation with valid conversation id', function () {
+    config(['ai.providers.openrouter.key' => 'testing-key']);
+
     $conversation = AgentConversation::create([
         'id' => (string) Str::uuid(),
         'user_id' => $this->user->id,

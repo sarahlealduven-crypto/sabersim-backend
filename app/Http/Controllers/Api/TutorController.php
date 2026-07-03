@@ -11,12 +11,14 @@ use App\Models\AgentConversation;
 use App\Models\AgentConversationMessage;
 use App\Models\Materia;
 use App\Models\Topico;
+use App\Models\User;
 use Dedoc\Scramble\Attributes\Endpoint;
 use Dedoc\Scramble\Attributes\Group;
 use Dedoc\Scramble\Attributes\PathParameter;
 use Dedoc\Scramble\Attributes\Response;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Str;
 
 #[Group('AI Tutor', weight: 5)]
 class TutorController extends Controller
@@ -42,6 +44,15 @@ class TutorController extends Controller
         $topico = $request->filled('topico_id')
             ? Topico::find($request->input('topico_id'))
             : null;
+
+        if ($this->usesLocalTutorFallback()) {
+            return new TutorResponseResource($this->localTutorResponse(
+                user: $user,
+                question: $request->input('question'),
+                materia: $materia,
+                topico: $topico,
+            ));
+        }
 
         $agent = new TutorAgent($materia, $topico);
         $response = $agent->forUser($user)->prompt($request->input('question'));
@@ -82,6 +93,14 @@ class TutorController extends Controller
 
         if (! $conversation) {
             abort(404, 'Conversación no encontrada.');
+        }
+
+        if ($this->usesLocalTutorFallback()) {
+            return new TutorResponseResource($this->localTutorResponse(
+                user: $user,
+                question: $request->input('question'),
+                conversation: $conversation,
+            ));
         }
 
         $agent = new TutorAgent;
@@ -133,6 +152,66 @@ class TutorController extends Controller
                 'per_page' => $conversations->perPage(),
                 'total' => $conversations->total(),
             ],
+        ]);
+    }
+
+    private function usesLocalTutorFallback(): bool
+    {
+        return blank(config('ai.providers.openrouter.key'));
+    }
+
+    private function localTutorResponse(
+        User $user,
+        string $question,
+        ?Materia $materia = null,
+        ?Topico $topico = null,
+        ?AgentConversation $conversation = null,
+    ): array {
+        $conversation ??= AgentConversation::create([
+            'id' => (string) Str::uuid(),
+            'user_id' => $user->id,
+            'title' => Str::limit($question, 60),
+        ]);
+
+        $this->storeLocalMessage($conversation, $user, 'user', $question);
+
+        $context = $materia
+            ? " sobre {$materia->nombre}".($topico ? " / {$topico->nombre}" : '')
+            : '';
+        $answer = "Estoy en modo tutor local{$context}. Para avanzar, identifica primero el concepto clave, ".
+            'escribe qué información te da el enunciado y prueba resolverlo paso a paso. '.
+            'Si compartes tu intento, puedo ayudarte a detectar el siguiente razonamiento sin darte una respuesta directa.';
+
+        $this->storeLocalMessage($conversation, $user, 'assistant', $answer);
+        $conversation->touch();
+
+        return [
+            'conversation_id' => $conversation->id,
+            'response' => $answer,
+            'materia' => $materia ? ['id' => $materia->id, 'nombre' => $materia->nombre] : null,
+            'topico' => $topico ? ['id' => $topico->id, 'nombre' => $topico->nombre] : null,
+            'created_at' => now()->toIso8601String(),
+        ];
+    }
+
+    private function storeLocalMessage(
+        AgentConversation $conversation,
+        User $user,
+        string $role,
+        string $content,
+    ): void {
+        AgentConversationMessage::create([
+            'id' => (string) Str::uuid(),
+            'conversation_id' => $conversation->id,
+            'user_id' => $user->id,
+            'agent' => TutorAgent::class,
+            'role' => $role,
+            'content' => $content,
+            'attachments' => '[]',
+            'tool_calls' => '[]',
+            'tool_results' => '[]',
+            'usage' => '[]',
+            'meta' => '[]',
         ]);
     }
 }
