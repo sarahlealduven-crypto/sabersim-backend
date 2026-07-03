@@ -12,6 +12,9 @@ use App\Filament\Resources\Examens\Pages\EditExamen;
 use App\Filament\Resources\Examens\Pages\ListExamens;
 use App\Filament\Resources\Examens\RelationManagers\SeccionesExamenRelationManager;
 use App\Filament\Resources\Examens\Tables\ExamensTable;
+use App\Filament\Resources\MaterialApoyos\MaterialApoyoResource;
+use App\Filament\Resources\MaterialApoyos\Pages\ListMaterialApoyos;
+use App\Filament\Resources\MaterialApoyos\Tables\MaterialApoyosTable;
 use App\Filament\Resources\Materias\Pages\EditMateria;
 use App\Filament\Resources\Materias\RelationManagers\PreguntasRelationManager as MateriaPreguntasRelationManager;
 use App\Filament\Resources\Materias\RelationManagers\TopicosRelationManager;
@@ -122,8 +125,13 @@ it('configures Filament resource infolists and tables directly', function (): vo
     $listExamens = Livewire::test(App\Filament\Resources\Examens\Pages\ListExamens::class)->instance();
     $listStats = Livewire::test(App\Filament\Resources\EstadisticaUsuarios\Pages\ListEstadisticaUsuarios::class)->instance();
     $listQuestions = Livewire::test(App\Filament\Resources\Preguntas\Pages\ListPreguntas::class)->instance();
+    $listMaterials = Livewire::test(ListMaterialApoyos::class)->instance();
 
     expect(ExamenResource::table(Table::make($listExamens)))
+        ->toBeInstanceOf(Table::class)
+        ->and(MaterialApoyoResource::table(Table::make($listMaterials)))
+        ->toBeInstanceOf(Table::class)
+        ->and(MaterialApoyosTable::configure(Table::make($listMaterials)))
         ->toBeInstanceOf(Table::class)
         ->and(ExamensTable::configure(Table::make($listExamens)))
         ->toBeInstanceOf(Table::class)

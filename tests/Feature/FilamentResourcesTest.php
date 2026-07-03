@@ -9,6 +9,9 @@ use App\Filament\Resources\EstadisticaUsuarios\Pages\ListEstadisticaUsuarios;
 use App\Filament\Resources\Examens\Pages\CreateExamen;
 use App\Filament\Resources\Examens\Pages\EditExamen;
 use App\Filament\Resources\Examens\Pages\ListExamens;
+use App\Filament\Resources\MaterialApoyos\Pages\CreateMaterialApoyo;
+use App\Filament\Resources\MaterialApoyos\Pages\EditMaterialApoyo;
+use App\Filament\Resources\MaterialApoyos\Pages\ListMaterialApoyos;
 use App\Filament\Resources\Materias\Pages\CreateMateria;
 use App\Filament\Resources\Materias\Pages\EditMateria;
 use App\Filament\Resources\Materias\Pages\ListMaterias;
@@ -33,6 +36,7 @@ use App\Filament\Resources\Users\Pages\ListUsers;
 use App\Models\EstadisticaUsuario;
 use App\Models\Examen;
 use App\Models\Materia;
+use App\Models\MaterialApoyo;
 use App\Models\OpcionRespuesta;
 use App\Models\Pregunta;
 use App\Models\RespuestaUsuario;
@@ -108,8 +112,14 @@ function filamentResourceGraph(): array
         'tiempo_total_gastado' => 3600,
         'fecha_ultimo_examen' => now(),
     ]);
+    $material = MaterialApoyo::factory()->create([
+        'materia_id' => $materia->id,
+        'titulo' => 'Guía de funciones lineales',
+        'slug' => 'guia-funciones-lineales',
+        'source_url' => 'https://www.youtube.com/watch?v=jjO21znJdiE',
+    ]);
 
-    return compact('user', 'materia', 'topico', 'pregunta', 'opcion', 'examen', 'seccion', 'respuesta', 'estadistica');
+    return compact('user', 'materia', 'topico', 'pregunta', 'opcion', 'examen', 'seccion', 'respuesta', 'estadistica', 'material');
 }
 
 it('loads every Filament resource list page with records', function (string $pageClass, string $visibleText): void {
@@ -121,6 +131,7 @@ it('loads every Filament resource list page with records', function (string $pag
         ->assertSee($visibleText);
 })->with([
     'materias' => [ListMaterias::class, 'Matemáticas'],
+    'materiales' => [ListMaterialApoyos::class, 'Guía de funciones lineales'],
     'topicos' => [ListTopicos::class, 'Álgebra'],
     'preguntas' => [ListPreguntas::class, '¿Cuánto es 2 + 2?'],
     'opciones' => [ListOpcionRespuestas::class, 'Cuatro'],
@@ -144,6 +155,7 @@ it('loads every Filament resource create page', function (string $pageClass): vo
         ->assertOk();
 })->with([
     CreateMateria::class,
+    CreateMaterialApoyo::class,
     CreateTopico::class,
     CreatePregunta::class,
     CreateOpcionRespuesta::class,
@@ -163,6 +175,7 @@ it('loads every Filament resource edit page with form state', function (string $
         ->assertSchemaStateSet($expectedState);
 })->with([
     'materia' => [EditMateria::class, 'materia', ['nombre' => 'Matemáticas']],
+    'material' => [EditMaterialApoyo::class, 'material', ['titulo' => 'Guía de funciones lineales']],
     'topico' => [EditTopico::class, 'topico', ['nombre' => 'Álgebra']],
     'pregunta' => [EditPregunta::class, 'pregunta', ['texto_pregunta' => '¿Cuánto es 2 + 2?']],
     'opcion' => [EditOpcionRespuesta::class, 'opcion', ['texto_opcion' => 'Cuatro']],
@@ -172,6 +185,60 @@ it('loads every Filament resource edit page with form state', function (string $
     'estadistica' => [EditEstadisticaUsuario::class, 'estadistica', ['total_preguntas_respondidas' => 1]],
     'user' => [EditUser::class, 'user', ['name' => 'Admin Student']],
 ]);
+
+it('creates and edits a support material through Filament forms', function (): void {
+    $materia = Materia::factory()->create([
+        'nombre' => 'Lectura Crítica',
+        'slug' => 'lectura-critica-admin',
+    ]);
+
+    actingAs(User::factory()->create());
+
+    Livewire::test(CreateMaterialApoyo::class)
+        ->fillForm([
+            'materia_id' => $materia->id,
+            'titulo' => 'Lectura crítica desde YouTube',
+            'slug' => 'lectura-critica-youtube-admin',
+            'descripcion' => 'Video de apoyo para practicar lectura crítica.',
+            'tipo' => MaterialApoyo::TIPO_YOUTUBE,
+            'source_url' => 'https://youtu.be/jjO21znJdiE',
+            'thumbnail_url' => 'https://img.youtube.com/vi/jjO21znJdiE/hqdefault.jpg',
+            'duracion' => 'Video',
+            'orden_visualizacion' => 8,
+            'activo' => true,
+        ])
+        ->call('create')
+        ->assertHasNoFormErrors();
+
+    $material = MaterialApoyo::query()->where('slug', 'lectura-critica-youtube-admin')->firstOrFail();
+
+    expect($material)
+        ->embed_url->toBe('https://www.youtube.com/embed/jjO21znJdiE')
+        ->activo->toBeTrue();
+
+    Livewire::test(EditMaterialApoyo::class, ['record' => $material->getRouteKey()])
+        ->fillForm([
+            'materia_id' => $materia->id,
+            'titulo' => 'Cuadernillo Drive de lectura crítica',
+            'slug' => 'cuadernillo-drive-lectura-critica-admin',
+            'descripcion' => 'Documento de apoyo externo.',
+            'tipo' => MaterialApoyo::TIPO_GOOGLE_DRIVE,
+            'source_url' => 'https://drive.google.com/file/d/148MvqVppDg7w0x9HJQnadS2OaS2ymiOx/view?usp=sharing',
+            'thumbnail_url' => null,
+            'duracion' => 'Guía',
+            'orden_visualizacion' => 9,
+            'activo' => false,
+        ])
+        ->call('save')
+        ->assertHasNoFormErrors();
+
+    expect($material->fresh())
+        ->titulo->toBe('Cuadernillo Drive de lectura crítica')
+        ->slug->toBe('cuadernillo-drive-lectura-critica-admin')
+        ->tipo->toBe(MaterialApoyo::TIPO_GOOGLE_DRIVE)
+        ->embed_url->toBe('https://drive.google.com/file/d/148MvqVppDg7w0x9HJQnadS2OaS2ymiOx/preview')
+        ->activo->toBeFalse();
+});
 
 it('creates and edits a subject through Filament forms', function (): void {
     actingAs(User::factory()->create());
