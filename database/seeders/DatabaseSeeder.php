@@ -19,6 +19,7 @@ class DatabaseSeeder extends Seeder
             MateriaSeeder::class,
             TopicoSeeder::class,
             PreguntaSeeder::class,
+            MaterialApoyoSeeder::class,
             ExamenSeeder::class,
             EstadisticaUsuarioSeeder::class,
         ]);

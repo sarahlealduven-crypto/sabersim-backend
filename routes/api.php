@@ -7,6 +7,7 @@ use App\Http\Controllers\Api\Auth\RegisterController;
 use App\Http\Controllers\Api\EstadisticaController;
 use App\Http\Controllers\Api\ExamenController;
 use App\Http\Controllers\Api\MateriaController;
+use App\Http\Controllers\Api\MaterialApoyoController;
 use App\Http\Controllers\Api\TutorController;
 use Illuminate\Support\Facades\Route;
 
@@ -21,6 +22,8 @@ Route::prefix('auth')->group(function () {
 Route::prefix('v1')->group(function () {
     Route::get('/materias', [MateriaController::class, 'index']);
     Route::get('/materias/{materia}', [MateriaController::class, 'show']);
+    Route::get('/materiales', [MaterialApoyoController::class, 'index']);
+    Route::get('/materiales/{material}', [MaterialApoyoController::class, 'show']);
 });
 
 Route::middleware('auth:sanctum')->prefix('v1')->group(function () {

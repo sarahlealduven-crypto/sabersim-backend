@@ -41,6 +41,11 @@ class Materia extends Model
         return $this->hasMany(Pregunta::class);
     }
 
+    public function materialesApoyo(): HasMany
+    {
+        return $this->hasMany(MaterialApoyo::class);
+    }
+
     public function seccionesExamen(): HasMany
     {
         return $this->hasMany(SeccionExamen::class);
