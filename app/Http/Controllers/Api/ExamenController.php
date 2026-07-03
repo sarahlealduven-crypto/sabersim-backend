@@ -10,7 +10,6 @@ use App\Http\Requests\IniciarExamenRequest;
 use App\Http\Requests\SubmitRespuestaRequest;
 use App\Http\Resources\ExamenResource;
 use App\Models\Examen;
-use App\Models\OpcionRespuesta;
 use App\Models\RespuestaUsuario;
 use App\Services\ExamenService;
 use Dedoc\Scramble\Attributes\Endpoint;
@@ -114,7 +113,8 @@ class ExamenController extends Controller
         }
 
         $seccionExamen = $examen->seccionesExamen()->findOrFail($request->validated('seccion_examen_id'));
-        $opcion = OpcionRespuesta::findOrFail($request->validated('opcion_id'));
+        $pregunta = $seccionExamen->preguntas()->findOrFail($request->validated('pregunta_id'));
+        $opcion = $pregunta->opcionesRespuesta()->findOrFail($request->validated('opcion_id'));
 
         $esCorrecta = $opcion->es_correcta;
 

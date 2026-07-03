@@ -57,6 +57,7 @@ class EstadisticaController extends Controller
 
         $estadistica = EstadisticaUsuario::where('user_id', $user->id)
             ->where('materia_id', $materia->id)
+            ->with('materia')
             ->firstOrFail();
 
         return new EstadisticaUsuarioResource($estadistica);

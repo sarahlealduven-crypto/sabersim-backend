@@ -2,11 +2,11 @@
 
 namespace App\Filament\Resources\RespuestaUsuarios\Schemas;
 
-use Filament\Forms;
+use App\Models\SeccionExamen;
 use Filament\Forms\Components\Select;
-use Filament\Schemas\Components\Section;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Toggle;
+use Filament\Schemas\Components\Section;
 use Filament\Schemas\Schema;
 
 class RespuestaUsuarioForm
@@ -19,7 +19,12 @@ class RespuestaUsuarioForm
                     ->schema([
                         Select::make('seccion_examen_id')
                             ->label('Sección del examen')
-                            ->relationship('seccionExamen', 'materia.nombre')
+                            ->relationship('seccionExamen', 'id')
+                            ->getOptionLabelFromRecordUsing(fn (SeccionExamen $record): string => sprintf(
+                                'Examen #%d - %s',
+                                $record->examen_id,
+                                $record->materia?->nombre ?? 'Sin materia',
+                            ))
                             ->searchable()
                             ->preload()
                             ->required()

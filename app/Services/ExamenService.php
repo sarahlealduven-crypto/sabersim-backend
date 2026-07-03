@@ -80,12 +80,16 @@ class ExamenService
                     ->where('es_correcta', true)
                     ->count();
 
+                $puntajeSeccion = $seccion->total_preguntas > 0
+                    ? ($respuestasCorrectas / $seccion->total_preguntas) * 100
+                    : 0;
+
                 $seccion->update([
                     'respuestas_correctas' => $respuestasCorrectas,
-                    'puntaje' => ($respuestasCorrectas / $seccion->total_preguntas) * 100,
+                    'puntaje' => $puntajeSeccion,
                 ]);
 
-                $totalPuntaje += $seccion->puntaje;
+                $totalPuntaje += $puntajeSeccion;
                 $tiempoTotal += $seccion->tiempo_gastado;
             }
 

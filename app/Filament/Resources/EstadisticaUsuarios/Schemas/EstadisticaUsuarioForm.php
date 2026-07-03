@@ -2,7 +2,6 @@
 
 namespace App\Filament\Resources\EstadisticaUsuarios\Schemas;
 
-use Filament\Forms;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
 use Filament\Schemas\Components\Section;
@@ -39,25 +38,16 @@ class EstadisticaUsuarioForm
                             ->minValue(0)
                             ->disabled(),
 
-                        TextInput::make('total_preguntas')
+                        TextInput::make('total_preguntas_respondidas')
                             ->label('Total de preguntas')
                             ->numeric()
                             ->minValue(0)
                             ->disabled(),
 
-                        TextInput::make('total_correctas')
+                        TextInput::make('respuestas_correctas')
                             ->label('Total correctas')
                             ->numeric()
                             ->minValue(0)
-                            ->disabled(),
-
-                        TextInput::make('porcentaje')
-                            ->label('Puntaje global (%)')
-                            ->numeric()
-                            ->minValue(0)
-                            ->maxValue(100)
-                            ->step(0.01)
-                            ->suffix('%')
                             ->disabled(),
                     ])
                     ->columns(2),
@@ -83,12 +73,12 @@ class EstadisticaUsuarioForm
                             ->suffix('%')
                             ->disabled(),
 
-                        TextInput::make('tiempo_total')
+                        TextInput::make('tiempo_total_gastado')
                             ->label('Tiempo total empleado (segundos)')
                             ->numeric()
                             ->minValue(0)
                             ->disabled()
-                            ->formatStateUsing(fn($state): string => $state ? self::formatTime($state) : '00:00'),
+                            ->formatStateUsing(fn ($state): string => $state ? self::formatTime($state) : '00:00'),
                     ])
                     ->columns(2),
             ]);
@@ -107,6 +97,7 @@ class EstadisticaUsuarioForm
         if ($hours > 0) {
             return sprintf('%02d:%02d:%02d', $hours, $minutes, $secs);
         }
+
         return sprintf('%02d:%02d', $minutes, $secs);
     }
 }

@@ -23,7 +23,7 @@ class EstadisticaUsuariosTable
                     ->searchable()
                     ->sortable()
                     ->wrap()
-                    ->description(fn($record): ?string => $record->user->email ?? ''),
+                    ->description(fn ($record): ?string => $record->user->email ?? ''),
 
                 TextColumn::make('materia.nombre')
                     ->label('Subject')
@@ -39,51 +39,43 @@ class EstadisticaUsuariosTable
                     ->badge()
                     ->color('primary'),
 
-                TextColumn::make('total_preguntas')
+                TextColumn::make('total_preguntas_respondidas')
                     ->label('Questions')
                     ->numeric()
                     ->sortable(),
 
-                TextColumn::make('total_correctas')
+                TextColumn::make('respuestas_correctas')
                     ->label('Correctas')
                     ->numeric()
                     ->sortable(),
-
-                TextColumn::make('porcentaje')
-                    ->label('Puntaje global')
-                    ->numeric()
-                    ->sortable()
-                    ->formatStateUsing(fn($state): string => number_format($state, 2) . '%')
-                    ->badge()
-                    ->color(fn($state): string => ($state >= 70) ? 'success' : (($state >= 50) ? 'warning' : 'danger')),
 
                 TextColumn::make('puntaje_promedio')
                     ->label('Average')
                     ->numeric()
                     ->sortable()
-                    ->formatStateUsing(fn($state): string => number_format($state, 2) . '%')
+                    ->formatStateUsing(fn ($state): string => number_format($state, 2).'%')
                     ->badge()
-                    ->color(fn($state): string => ($state >= 70) ? 'success' : (($state >= 50) ? 'warning' : 'danger')),
+                    ->color(fn ($state): string => ($state >= 70) ? 'success' : (($state >= 50) ? 'warning' : 'danger')),
 
                 TextColumn::make('mejor_puntaje')
                     ->label('Mejor puntaje')
                     ->numeric()
                     ->sortable()
-                    ->formatStateUsing(fn($state): string => number_format($state, 2) . '%')
+                    ->formatStateUsing(fn ($state): string => number_format($state, 2).'%')
                     ->badge()
                     ->color('success'),
 
-                TextColumn::make('tiempo_total')
+                TextColumn::make('tiempo_total_gastado')
                     ->label('Total Time')
                     ->numeric()
                     ->sortable()
-                    ->formatStateUsing(fn($state): string => $state ? self::formatTime($state) : '00:00'),
+                    ->formatStateUsing(fn ($state): string => $state ? self::formatTime($state) : '00:00'),
 
-                TextColumn::make('ultimo_examen')
+                TextColumn::make('fecha_ultimo_examen')
                     ->label('Último examen')
                     ->dateTime()
                     ->sortable()
-                    ->formatStateUsing(fn($state): ?string => $state ? $state->format('d/m/Y H:i') : '-'),
+                    ->formatStateUsing(fn ($state): ?string => $state ? $state->format('d/m/Y H:i') : '-'),
 
                 TextColumn::make('created_at')
                     ->label('Created At')
@@ -112,7 +104,7 @@ class EstadisticaUsuariosTable
                     ->preload(),
 
                 Filter::make('puntaje_promedio_range')
-                    ->form(fn(Filter $filter): array => [
+                    ->form(fn (Filter $filter): array => [
                         Forms\Components\TextInput::make('min_puntaje')
                             ->label('Puntaje mín. (%)')
                             ->numeric()
@@ -132,11 +124,11 @@ class EstadisticaUsuariosTable
                         return $query
                             ->when(
                                 $data['min_puntaje'],
-                                fn(\Illuminate\Database\Eloquent\Builder $query, $value): \Illuminate\Database\Eloquent\Builder => $query->where('puntaje_promedio', '>=', $value),
+                                fn (\Illuminate\Database\Eloquent\Builder $query, $value): \Illuminate\Database\Eloquent\Builder => $query->where('puntaje_promedio', '>=', $value),
                             )
                             ->when(
                                 $data['max_puntaje'],
-                                fn(\Illuminate\Database\Eloquent\Builder $query, $value): \Illuminate\Database\Eloquent\Builder => $query->where('puntaje_promedio', '<=', $value),
+                                fn (\Illuminate\Database\Eloquent\Builder $query, $value): \Illuminate\Database\Eloquent\Builder => $query->where('puntaje_promedio', '<=', $value),
                             );
                     }),
             ])
@@ -164,6 +156,7 @@ class EstadisticaUsuariosTable
         if ($hours > 0) {
             return sprintf('%02d:%02d:%02d', $hours, $minutes, $secs);
         }
+
         return sprintf('%02d:%02d', $minutes, $secs);
     }
 }

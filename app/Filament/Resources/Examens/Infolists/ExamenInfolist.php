@@ -3,12 +3,9 @@
 namespace App\Filament\Resources\Examens\Infolists;
 
 use App\Enums\EstadoExamen;
-use App\Enums\TipoExamen;
-use Filament\Infolists;
-use Filament\Infolists\Components\IconEntry;
 use Filament\Infolists\Components\TextEntry;
-use Filament\Infolists\Components\Section;
-use Filament\Infolists\Components\Grid;
+use Filament\Schemas\Components\Grid;
+use Filament\Schemas\Components\Section;
 use Filament\Schemas\Schema;
 
 class ExamenInfolist
@@ -34,19 +31,15 @@ class ExamenInfolist
                                 TextEntry::make('estado')
                                     ->label('Estado')
                                     ->badge()
-                                    ->color(fn(EstadoExamen $state): string => match ($state) {
-                                        EstadoExamen::EnProgreso => 'info',
-                                        EstadoExamen::Completado => 'success',
-                                        EstadoExamen::Abandonado => 'danger',
-                                    })
+                                    ->color(fn (EstadoExamen $state): string => self::estadoColor($state))
                                     ->icon('heroicon-o-circle-stack'),
 
                                 TextEntry::make('puntaje_total')
                                     ->label('Puntaje total')
-                                    ->formatStateUsing(fn($state): string => $state . '%')
+                                    ->formatStateUsing(fn ($state): string => $state.'%')
                                     ->icon('heroicon-o-chart-bar')
                                     ->badge()
-                                    ->color(fn($state): ?string => $state >= 70 ? 'success' : ($state >= 50 ? 'warning' : 'danger')),
+                                    ->color(fn ($state): ?string => $state >= 70 ? 'success' : ($state >= 50 ? 'warning' : 'danger')),
                             ]),
 
                         Grid::make(2)
@@ -64,7 +57,7 @@ class ExamenInfolist
 
                         TextEntry::make('tiempo_gastado')
                             ->label('Tiempo empleado')
-                            ->formatStateUsing(fn($state): string => $state ? self::formatTime($state) : '00:00')
+                            ->formatStateUsing(fn ($state): string => $state ? self::formatTime($state) : '00:00')
                             ->icon('heroicon-o-clock'),
                     ]),
 
@@ -73,28 +66,29 @@ class ExamenInfolist
                     ->schema([
                         TextEntry::make('secciones_count')
                             ->label('Total de secciones')
+                            ->getStateUsing(fn ($record): int => $record->seccionesExamen()->count())
                             ->numeric()
                             ->icon('heroicon-squares-2x2'),
 
                         TextEntry::make('total_preguntas')
                             ->label('Total de preguntas')
+                            ->getStateUsing(fn ($record): int => (int) $record->seccionesExamen()->sum('total_preguntas'))
                             ->numeric()
                             ->icon('heroicon-o-question-mark-circle'),
 
                         TextEntry::make('total_correctas')
                             ->label('Respuestas correctas')
+                            ->getStateUsing(fn ($record): int => (int) $record->seccionesExamen()->sum('respuestas_correctas'))
                             ->numeric()
                             ->icon('heroicon-o-check-circle'),
 
                         TextEntry::make('created_at')
                             ->label('Creado el')
-                            ->dateTime()
-                            ->toggleable(isToggledHiddenByDefault: true),
+                            ->dateTime(),
 
                         TextEntry::make('updated_at')
                             ->label('Actualizado el')
-                            ->dateTime()
-                            ->toggleable(isToggledHiddenByDefault: true),
+                            ->dateTime(),
                     ]),
             ]);
     }
@@ -110,5 +104,14 @@ class ExamenInfolist
         $secs = $seconds % 60;
 
         return sprintf('%02d:%02d:%02d', $hours, $minutes, $secs);
+    }
+
+    protected static function estadoColor(EstadoExamen $state): string
+    {
+        return match ($state) {
+            EstadoExamen::EnProgreso => 'info',
+            EstadoExamen::Completado => 'success',
+            EstadoExamen::Abandonado => 'danger',
+        };
     }
 }

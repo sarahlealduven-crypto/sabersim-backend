@@ -29,7 +29,7 @@ class EstadisticaUsuarioResource extends JsonResource
             /**
              * Información de la materia (null para estadísticas generales).
              */
-            'materia' => MateriaResource::make($this->whenLoaded('materia') ? $this->materia : null),
+            'materia' => MateriaResource::make($this->whenLoaded('materia')),
 
             /**
              * Número total de exámenes realizados.

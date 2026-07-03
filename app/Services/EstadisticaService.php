@@ -86,9 +86,7 @@ class EstadisticaService
             }
         }
 
-        $puntajePromedio = $estadistica->total_examenes > 0
-            ? ($examenesMateria->sum('puntaje_total') / $examenesMateria->count())
-            : 0;
+        $puntajePromedio = $examenesMateria->sum('puntaje_total') / $examenesMateria->count();
         $mejorPuntaje = $examenesMateria->max('puntaje_total') ?? 0;
 
         $estadistica->update([
