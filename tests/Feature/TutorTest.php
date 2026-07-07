@@ -198,6 +198,55 @@ it('can list tutor conversations', function () {
     expect($response->json('data'))->toBeArray();
 });
 
+it('can show a tutor conversation with messages', function () {
+    $conversation = AgentConversation::create([
+        'id' => (string) Str::uuid(),
+        'user_id' => $this->user->id,
+        'title' => 'Tutor algebra',
+    ]);
+
+    AgentConversationMessage::create([
+        'id' => (string) Str::uuid(),
+        'conversation_id' => $conversation->id,
+        'user_id' => $this->user->id,
+        'agent' => TutorAgent::class,
+        'role' => 'user',
+        'content' => 'How do I isolate x?',
+        'attachments' => '[]',
+        'tool_calls' => '[]',
+        'tool_results' => '[]',
+        'usage' => '[]',
+        'meta' => '[]',
+        'created_at' => now()->subMinute(),
+    ]);
+    AgentConversationMessage::create([
+        'id' => (string) Str::uuid(),
+        'conversation_id' => $conversation->id,
+        'user_id' => $this->user->id,
+        'agent' => TutorAgent::class,
+        'role' => 'assistant',
+        'content' => 'Move constants to the other side first.',
+        'attachments' => '[]',
+        'tool_calls' => '[]',
+        'tool_results' => '[]',
+        'usage' => '[]',
+        'meta' => '[]',
+        'created_at' => now(),
+    ]);
+
+    $response = actingAs($this->user)->getJson("/api/v1/tutor/conversations/{$conversation->id}");
+
+    $response->assertSuccessful()
+        ->assertJsonPath('data.id', $conversation->id)
+        ->assertJsonPath('data.title', 'Tutor algebra')
+        ->assertJsonPath('data.messages.0.role', 'user')
+        ->assertJsonPath('data.messages.0.content', 'How do I isolate x?')
+        ->assertJsonPath('data.messages.1.role', 'assistant')
+        ->assertJsonPath('data.messages.1.content', 'Move constants to the other side first.')
+        ->assertJsonMissingPath('data.messages.0.usage')
+        ->assertJsonMissingPath('data.messages.0.tool_calls');
+});
+
 it('cannot access another users conversation', function () {
     $otherUser = User::factory()->create();
     $conversation = AgentConversation::create([

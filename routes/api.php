@@ -43,5 +43,6 @@ Route::middleware('auth:sanctum')->prefix('v1')->group(function () {
         Route::post('/ask', [TutorController::class, 'ask']);
         Route::post('/continue/{conversationId}', [TutorController::class, 'continue']);
         Route::get('/conversations', [TutorController::class, 'conversations']);
+        Route::get('/conversations/{conversationId}', [TutorController::class, 'conversation']);
     });
 });

@@ -155,6 +155,57 @@ class TutorController extends Controller
         ]);
     }
 
+    /**
+     * Show a tutor conversation with its messages.
+     */
+    #[Endpoint(
+        operationId: 'showTutorConversation',
+        title: 'Ver conversación del tutor',
+        description: 'Devuelve una conversación del tutor AI con sus mensajes para el usuario autenticado.'
+    )]
+    #[PathParameter('conversationId', description: 'ID de la conversación (UUID)', type: 'string', example: '01936e42-7a1b-7000-8000-000000000000')]
+    #[Response(200, 'Conversación del tutor con mensajes')]
+    #[Response(401, 'No autenticado')]
+    #[Response(403, 'Usuario tiene un examen activo')]
+    #[Response(404, 'Conversación no encontrada')]
+    public function conversation(string $conversationId, Request $request): JsonResponse
+    {
+        $userId = $request->user()->id;
+
+        $conversation = AgentConversation::query()
+            ->where('id', $conversationId)
+            ->where('user_id', $userId)
+            ->whereHas('messages', fn ($query) => $query
+                ->where('user_id', $userId)
+                ->where('agent', TutorAgent::class)
+            )
+            ->with(['messages' => fn ($query) => $query
+                ->where('user_id', $userId)
+                ->where('agent', TutorAgent::class)
+                ->orderBy('created_at'),
+            ])
+            ->first();
+
+        if (! $conversation) {
+            abort(404, 'Conversación no encontrada.');
+        }
+
+        return response()->json([
+            'data' => [
+                'id' => $conversation->id,
+                'title' => $conversation->title,
+                'created_at' => $conversation->created_at?->toIso8601String(),
+                'updated_at' => $conversation->updated_at?->toIso8601String(),
+                'messages' => $conversation->messages->map(fn (AgentConversationMessage $message): array => [
+                    'id' => $message->id,
+                    'role' => $message->role,
+                    'content' => $message->content,
+                    'created_at' => $message->created_at?->toIso8601String(),
+                ])->values(),
+            ],
+        ]);
+    }
+
     private function usesLocalTutorFallback(): bool
     {
         return blank(config('ai.providers.openrouter.key'));
